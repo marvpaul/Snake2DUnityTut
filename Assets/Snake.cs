@@ -10,7 +10,7 @@ public class Snake : MonoBehaviour
     public GameObject block; 
 
     GameObject head; 
-    public Material headMaterial, tailMaterial; 
+    public Sprite headMaterial, tailMaterial, border, inner, point; 
     List<GameObject> tail; 
 
     Vector2 dir;
@@ -22,11 +22,26 @@ public class Snake : MonoBehaviour
         timeBetweenMovements = 0.5f;
         dir = Vector2.right;
         createGrid();
+        createInnerTiles();
         createPlayer(); 
         spawnFood(); 
         block.SetActive(false);
         isAlive = true;
     }
+
+    private void createInnerTiles(){
+        for(int x = -xSize/2+1; x < xSize/2; x++){
+        
+            for(int y = -ySize/2+1; y < ySize/2; y++){
+                GameObject innerTile = Instantiate(block) as GameObject;
+                innerTile.GetComponent<Transform>().position = new Vector3(x, y, 1); 
+                innerTile.GetComponent<SpriteRenderer>().sprite = inner;
+            }
+        }
+
+    }
+
+
 
     private Vector2 getRandomPos(){
         return new Vector2(Random.Range(-xSize/2+1, xSize/2), Random.Range(-ySize/2+1, ySize/2)); 
@@ -52,31 +67,33 @@ public class Snake : MonoBehaviour
             spawnPos = getRandomPos();
         }
         food = Instantiate(block);
+        food.GetComponent<SpriteRenderer>().sprite = point;
         food.transform.position = new Vector3(spawnPos.x, spawnPos.y, 0);
         food.SetActive(true);
     }
 
     private void createPlayer(){
         head = Instantiate(block) as GameObject; 
-        head.GetComponent<MeshRenderer>().material = headMaterial;
+        head.GetComponent<SpriteRenderer>().sprite = headMaterial;
+        head.transform.name = "Player";
         tail = new List<GameObject>(); 
     }
 
     private void createGrid(){
         for(int x = 0; x <= xSize; x++){
             GameObject borderBottom = Instantiate(block) as GameObject; 
-            borderBottom.GetComponent<Transform>().position = new Vector3(x-xSize/2, -ySize/2, 0);
+            borderBottom.GetComponent<Transform>().position = new Vector3(x-xSize/2, -ySize/2, 1);
 
             GameObject borderTop = Instantiate(block) as GameObject; 
-            borderTop.GetComponent<Transform>().position = new Vector3(x-xSize/2, ySize-ySize/2, 0);
+            borderTop.GetComponent<Transform>().position = new Vector3(x-xSize/2, ySize-ySize/2, 1);
         }
 
         for(int y = 0; y <= ySize; y++){
             GameObject borderRight = Instantiate(block) as GameObject;
-            borderRight.GetComponent<Transform>().position = new Vector3(-xSize/2, y-(ySize/2), 0); 
+            borderRight.GetComponent<Transform>().position = new Vector3(-xSize/2, y-(ySize/2), 1); 
 
             GameObject borderLeft = Instantiate(block) as GameObject;
-            borderLeft.GetComponent<Transform>().position = new Vector3(xSize-(xSize/2), y-(ySize/2), 0); 
+            borderLeft.GetComponent<Transform>().position = new Vector3(xSize-(xSize/2), y-(ySize/2), 1); 
         }
     }
 
@@ -133,20 +150,20 @@ public class Snake : MonoBehaviour
                 newTile.SetActive(true);
                 newTile.transform.position = food.transform.position;
                 DestroyImmediate(food);
-                head.GetComponent<MeshRenderer>().material = tailMaterial;
+                head.GetComponent<SpriteRenderer>().sprite = tailMaterial;
                 tail.Add(head); 
                 head = newTile;
-                head.GetComponent<MeshRenderer>().material = headMaterial;
+                head.GetComponent<SpriteRenderer>().sprite = headMaterial;
                 spawnFood();
                 points.text = "Points: " + tail.Count;
             } else {
                 if(tail.Count == 0){
                     head.transform.position = newPosition;
                 } else {
-                    head.GetComponent<MeshRenderer>().material = tailMaterial;
+                    head.GetComponent<SpriteRenderer>().sprite = tailMaterial;
                     tail.Add(head); 
                     head = tail[0];
-                    head.GetComponent<MeshRenderer>().material = headMaterial;
+                    head.GetComponent<SpriteRenderer>().sprite = headMaterial;
                     tail.RemoveAt(0);
                     head.transform.position = newPosition;
                 }
